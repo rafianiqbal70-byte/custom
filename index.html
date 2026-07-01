@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>First SMM Panel BD</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+        :root{
+            --primary:#10b981;--primary-dark:#059669;
+            --bg-main:#060d18;--bg-card:rgba(15,23,42,0.75);
+            --bg-input:rgba(30,41,59,0.85);--text-main:#f1f5f9;
+            --text-muted:#64748b;--border-color:rgba(148,163,184,0.12);
+            --glass-border:rgba(255,255,255,0.06);--radius-lg:20px;
+            --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);
+        }
+        body{
+            font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg-main);
+            color:var(--text-main);overflow-x:hidden;min-height:100vh;
+            padding-top:var(--safe-top);padding-bottom:var(--safe-bottom);
+        }
+        body.light-theme{
+            --bg-main:#f0f4f8;--bg-card:rgba(255,255,255,0.88);
+            --bg-input:rgba(241,245,249,0.92);--text-main:#0f172a;
+            --text-muted:#64748b;--border-color:rgba(15,23,42,0.08);
+            --glass-border:rgba(0,0,0,0.04);
+        }
+        body::before{
+            content:'';position:fixed;top:-120px;left:-80px;width:350px;height:350px;
+            background:radial-gradient(circle,rgba(16,185,129,0.1) 0%,transparent 70%);
+            border-radius:50%;z-index:0;pointer-events:none;animation:floatOrb 8s ease-in-out infinite;
+        }
+        @keyframes floatOrb{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,20px) scale(1.1)}}
+
+        .page-section{display:none;opacity:0;transform:translateY(12px);transition:all .35s cubic-bezier(.16,1,.3,1);position:relative;z-index:1}
+        .page-section.active{display:block;opacity:1;transform:translateY(0)}
+
+        .premium-header{
+            background:linear-gradient(160deg,rgba(16,185,129,0.12) 0%,rgba(15,23,42,0.85) 60%);
+            border-radius:0 0 36px 36px;border-bottom:1px solid var(--glass-border);
+            backdrop-filter:blur(20px);position:relative;z-index:2;overflow:hidden;
+        }
+        body.light-theme .premium-header{
+            background:linear-gradient(160deg,rgba(16,185,129,0.08) 0%,rgba(255,255,255,0.92) 60%);
+            border-bottom:1px solid rgba(0,0,0,0.05);
+        }
+
+        .glass-card{
+            background:var(--bg-card);backdrop-filter:blur(20px);border-radius:var(--radius-lg);
+            border:1px solid var(--glass-border);box-shadow:0 8px 24px rgba(0,0,0,0.25);
+            transition:transform .15s ease;
+        }
+        body.light-theme .glass-card{box-shadow:0 4px 15px rgba(0,0,0,0.05)}
+
+        .social-icon-box{
+            background:var(--bg-input);backdrop-filter:blur(10px);aspect-ratio:1/1;
+            border-radius:20px;display:flex;align-items:center;justify-content:center;
+            font-size:24px;border:1px solid var(--glass-border);
+            box-shadow:0 4px 10px rgba(0,0,0,0.15);transition:all .2s;cursor:pointer;
+        }
+        .social-icon-box:active{transform:scale(0.88);border-color:var(--primary)}
+
+        .input-modern{
+            width:100%;background:var(--bg-input);border:1.5px solid var(--border-color);
+            border-radius:14px;padding:14px 16px;font-size:14px;font-weight:500;
+            color:var(--text-main);outline:none;transition:all .2s;
+            font-family:'Plus Jakarta Sans',sans-serif;
+        }
+        .input-modern::placeholder{color:var(--text-muted)}
+        .input-modern:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(16,185,129,0.12)}
+        .input-modern.error-shake{animation:shake .4s ease;border-color:#ef4444!important;box-shadow:0 0 0 3px rgba(239,68,68,0.12)!important}
+        @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+        select.input-modern{cursor:pointer}
+        select.input-modern option{background:#1e293b;color:#f1f5f9}
+
+        .btn-primary-solid{
+            background:linear-gradient(135deg,#10b981 0%,#059669 100%);
+            color:white;width:100%;padding:16px;border-radius:16px;font-weight:800;font-size:14px;
+            box-shadow:0 8px 24px rgba(16,185,129,0.3);transition:0.2s;border:none;cursor:pointer;
+            font-family:'Plus Jakarta Sans',sans-serif;position:relative;overflow:hidden;
+        }
+        .btn-primary-solid:active:not(:disabled){transform:scale(0.97);box-shadow:0 4px 12px rgba(16,185,129,0.2)}
+        .btn-primary-solid:disabled{opacity:0.5;cursor:not-allowed}
+
+        .btn-secondary-solid{
+            background:var(--bg-input);color:var(--text-main);width:100%;padding:16px;
+            border-radius:16px;font-weight:800;font-size:14px;
+            box-shadow:0 4px 15px rgba(0,0,0,0.15);transition:0.2s;
+            border:1px solid var(--border-color);cursor:pointer;
+            font-family:'Plus Jakarta Sans',sans-serif;
+        }
+        .btn-secondary-solid:active:not(:disabled){transform:scale(0.97)}
+        .btn-secondary-solid:disabled{opacity:0.5;cursor:not-allowed}
+
+        .bottom-nav-premium{
+            position:fixed;bottom:16px;left:16px;right:16px;
+            background:var(--bg-card);backdrop-filter:blur(30px);height:72px;
+            border-radius:36px;display:flex;justify-content:space-around;align-items:center;
+            box-shadow:0 15px 40px rgba(0,0,0,0.4),0 0 0 1px var(--glass-border);z-index:1100;
+        }
+        .nav-item-premium{
+            display:flex;flex-direction:column;align-items:center;gap:5px;
+            color:var(--text-muted);transition:all .25s;cursor:pointer;
+            font-weight:700;padding:8px 14px;border-radius:18px;
+        }
+        .nav-item-premium i{font-size:20px}
+        .nav-item-premium span{font-size:9px;font-weight:800;letter-spacing:.5px}
+        .nav-item-premium.active{
+            color:var(--primary);background:rgba(16,185,129,0.1);
+            transform:translateY(-3px);box-shadow:0 6px 15px rgba(16,185,129,0.12);
+        }
+
+        .stat-card{
+            background:rgba(255,255,255,0.05);backdrop-filter:blur(10px);
+            border-radius:16px;border:1px solid rgba(255,255,255,0.08);padding:16px;
+        }
+        body.light-theme .stat-card{background:rgba(0,0,0,0.03);border:1px solid rgba(0,0,0,0.05)}
+
+        .order-status{font-size:9px;font-weight:800;padding:4px 10px;border-radius:40px;text-transform:uppercase;letter-spacing:.8px}
+        .form-label{font-size:10px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;display:block}
+        .section-title{font-size:22px;font-weight:900;letter-spacing:-.5px}
+        .price-preview-box{background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.15);border-radius:14px;padding:12px;text-align:center}
+        .dashed-divider{border-top:1px dashed var(--border-color)}
+        .live-badge{background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.15);color:#f87171;padding:5px 12px;border-radius:40px;font-size:9px;font-weight:900;letter-spacing:1.5px;display:flex;align-items:center;gap:5px}
+        .live-badge::before{content:'';width:5px;height:5px;background:#ef4444;border-radius:50%;animation:pulse-dot 1.5s infinite}
+        @keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
+
+        .deposit-method{background:var(--bg-input);border:1px solid var(--border-color);border-radius:14px;padding:8px 16px;font-size:12px;font-weight:700;color:var(--text-main);cursor:pointer;transition:.2s}
+        .deposit-method.active-method{background:rgba(16,185,129,0.12);border-color:rgba(16,185,129,0.3);color:#34d399}
+        .copy-btn{background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.15);color:#34d399;padding:8px 16px;border-radius:12px;font-size:11px;font-weight:800;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:.15s}
+        .copy-btn:active{transform:scale(0.95)}
+        .deposit-history-card{background:var(--bg-input);border:1px solid var(--border-color);border-radius:14px;padding:14px;margin-bottom:10px}
+
+        .splash-bg{background:radial-gradient(ellipse at 30% 20%,rgba(16,185,129,0.12) 0%,transparent 50%),var(--bg-main)}
+        .splash-icon{background:linear-gradient(135deg,#10b981 0%,#059669 100%);box-shadow:0 20px 50px rgba(16,185,129,0.35)}
+        .splash-loader{width:180px;height:3px;background:rgba(255,255,255,0.06);border-radius:10px;overflow:hidden}
+        .splash-loader-fill{height:100%;background:linear-gradient(90deg,#10b981,#34d399);border-radius:10px;animation:splashLoad 2s ease-in-out forwards}
+        @keyframes splashLoad{0%{width:0}100%{width:100%}}
+        .loading-spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-radius:50%;border-top-color:white;animation:spin .6s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+
+        .toast-container{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;pointer-events:none;display:flex;flex-direction:column;gap:8px;width:90%;max-width:380px}
+        .toast-item{pointer-events:auto;padding:14px 18px;border-radius:16px;font-size:12px;font-weight:700;backdrop-filter:blur(20px);animation:toastIn .35s cubic-bezier(.16,1,.3,1);display:flex;align-items:center;gap:10px;box-shadow:0 12px 30px rgba(0,0,0,0.35)}
+        .toast-item.toast-out{animation:toastOut .3s ease forwards}
+        .toast-success{background:rgba(16,185,129,0.92);color:white;border:1px solid rgba(255,255,255,0.15)}
+        .toast-error{background:rgba(239,68,68,0.92);color:white;border:1px solid rgba(255,255,255,0.15)}
+        .toast-warning{background:rgba(245,158,11,0.92);color:white;border:1px solid rgba(255,255,255,0.15)}
+        .toast-info{background:rgba(59,130,246,0.92);color:white;border:1px solid rgba(255,255,255,0.15)}
+        @keyframes toastIn{from{opacity:0;transform:translateY(-20px) scale(0.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+        @keyframes toastOut{to{opacity:0;transform:translateY(-20px) scale(0.95)}}
+
+        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);z-index:9998;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+        .modal-overlay.show{opacity:1;pointer-events:auto}
+        .modal-sheet{background:var(--bg-card);backdrop-filter:blur(30px);border-radius:24px 24px 0 0;width:100%;max-width:480px;padding:8px 24px 32px;transform:translateY(100%);transition:transform .35s cubic-bezier(.16,1,.3,1);border:1px solid var(--glass-border);border-bottom:none}
+        .modal-overlay.show .modal-sheet{transform:translateY(0)}
+        .modal-handle{width:36px;height:4px;background:rgba(255,255,255,0.15);border-radius:10px;margin:8px auto 20px}
+
+        .icon-fb{color:#1877F2}.icon-ig{color:#E4405F}.icon-tt{color:#fff}.icon-yt{color:#FF0000}
+        .icon-tw{color:#1DA1F2}.icon-li{color:#0A66C2}.icon-sc{color:#FFFC00}.icon-tp{color:#0088CC}
+        ::-webkit-scrollbar{width:0}
+
+        .step-indicator{display:flex;align-items:center;gap:6px;margin-bottom:16px}
+        .step-dot{width:8px;height:8px;border-radius:50%;background:var(--border-color);transition:all .3s}
+        .step-dot.active{background:var(--primary);box-shadow:0 0 8px rgba(16,185,129,0.4)}
+        .step-dot.done{background:var(--primary)}
+        .step-line{flex:1;height:2px;background:var(--border-color);border-radius:2px;position:relative;overflow:hidden}
+        .step-line-fill{height:100%;background:var(--primary);border-radius:2px;transition:width .4s ease}
+
+        .min-max-hint{font-size:9px;color:var(--text-muted);margin-top:4px;font-weight:600}
+        .field-error{font-size:9px;color:#f87171;margin-top:4px;font-weight:700;display:none}
+        .field-error.show{display:block}
+
+        .empty-state{display:flex;flex-direction:column;align-items:center;padding:40px 20px;opacity:.35}
+        .empty-state i{font-size:40px;margin-bottom:12px;color:var(--text-muted)}
+        .empty-state p{font-weight:700;font-size:13px;color:var(--text-muted)}
+
+        /* ===== AUTH SCREEN ===== */
+        #authScreen{
+            position:fixed;inset:0;z-index:8000;
+            background:radial-gradient(ellipse at 50% 0%,rgba(16,185,129,0.08) 0%,transparent 60%),var(--bg-main);
+            display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;
+        }
+        #authScreen.visible{display:flex}
+        .auth-logo{
+            width:80px;height:80px;border-radius:24px;
+            background:linear-gradient(135deg,#10b981,#059669);
+            box-shadow:0 16px 40px rgba(16,185,129,0.3);
+            display:flex;align-items:center;justify-content:center;margin-bottom:20px;
+        }
+        .auth-card{
+            width:100%;max-width:380px;background:var(--bg-card);
+            backdrop-filter:blur(24px);border-radius:28px;
+            border:1px solid var(--glass-border);
+            box-shadow:0 20px 50px rgba(0,0,0,0.3);padding:32px 24px;
+        }
+        .auth-tab{display:flex;background:var(--bg-input);border-radius:14px;padding:4px;margin-bottom:24px}
+        .auth-tab-btn{
+            flex:1;padding:12px;text-align:center;border-radius:11px;font-weight:800;font-size:13px;
+            cursor:pointer;transition:all .25s;border:none;background:transparent;
+            color:var(--text-muted);font-family:'Plus Jakarta Sans',sans-serif;
+        }
+        .auth-tab-btn.active-tab{background:var(--primary);color:white;box-shadow:0 4px 12px rgba(16,185,129,0.25)}
+        .auth-input{
+            width:100%;background:var(--bg-input);border:1.5px solid var(--border-color);
+            border-radius:14px;padding:14px 16px;font-size:14px;font-weight:500;
+            color:var(--text-main);outline:none;transition:all .2s;
+            font-family:'Plus Jakarta Sans',sans-serif;margin-bottom:4px;
+        }
+        .auth-input::placeholder{color:var(--text-muted)}
+        .auth-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(16,185,129,0.12)}
+        .auth-input.error-shake{animation:shake .4s ease;border-color:#ef4444!important}
+        .auth-error{font-size:9px;color:#f87171;font-weight:700;margin-bottom:8px;display:none}
+        .auth-error.show{display:block}
+        .auth-divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--text-muted);font-size:11px;font-weight:600}
+        .auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border-color)}
+        .auth-tg-btn{
+            width:100%;padding:14px;border-radius:14px;font-weight:800;font-size:13px;
+            cursor:pointer;transition:all .2s;border:1.5px solid var(--border-color);
+            background:var(--bg-input);color:var(--text-main);
+            font-family:'Plus Jakarta Sans',sans-serif;
+            display:flex;align-items:center;justify-content:center;gap:10px;
+        }
+        .auth-tg-btn:active{transform:scale(0.97)}
+        .auth-form{display:none}
+        .auth-form.active-form{display:block}
+        @keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        .auth-animate{animation:fadeInUp .4s cubic-bezier(.16,1,.3,1)}
+    </style>
+</head>
+<body class="max-w-[480px] mx-auto relative">
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Confirm Modal -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal-sheet">
+            <div class="modal-handle"></div>
+            <h3 id="modalTitle" class="text-lg font-black mb-2">Confirm Order</h3>
+            <div id="modalBody" class="text-sm text-slate-400 mb-6 space-y-1.5"></div>
+            <div class="flex gap-3">
+                <button id="modalCancelBtn" class="btn-secondary-solid flex-1" style="padding:14px">CANCEL</button>
+                <button id="modalConfirmBtn" class="btn-primary-solid flex-1" style="padding:14px">CONFIRM</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== AUTH SCREEN ===== -->
+    <div id="authScreen">
+        <div class="auth-logo"><i class="fas fa-bolt text-white text-3xl"></i></div>
+        <h1 class="text-2xl font-black tracking-tight mb-1">FIRST SMM</h1>
+        <p class="text-xs font-bold tracking-widest uppercase mb-8" style="color:var(--text-muted)">Bangladesh's #1 Panel</p>
+
+        <div class="auth-card auth-animate">
+            <!-- Tabs -->
+            <div class="auth-tab">
+                <button class="auth-tab-btn active-tab" id="loginTabBtn" onclick="switchAuthTab('login')">Login</button>
+                <button class="auth-tab-btn" id="registerTabBtn" onclick="switchAuthTab('register')">Register</button>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <div class="auth-form active-form" id="loginForm">
+                <div>
+                    <label class="form-label">Username</label>
+                    <input type="text" id="loginUsername" class="auth-input" placeholder="Enter your username" autocomplete="username">
+                    <p class="auth-error" id="loginUserError">Username is required</p>
+                </div>
+                <div style="margin-top:12px">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="loginPassword" class="auth-input" placeholder="Enter your password" autocomplete="current-password">
+                    <p class="auth-error" id="loginPassError">Password is required</p>
+                </div>
+                <button id="loginBtn" class="btn-primary-solid flex items-center justify-center gap-2" style="margin-top:20px" onclick="handleLogin()">
+                    <i class="fas fa-sign-in-alt text-xs"></i>
+                    <span id="loginBtnText">LOGIN</span>
+                </button>
+                <div class="auth-divider">OR</div>
+                <button class="auth-tg-btn" onclick="loginWithTelegram()">
+                    <i class="fab fa-telegram text-[#2AABEE] text-lg"></i>
+                    Continue with Telegram
+                </button>
+            </div>
+
+            <!-- REGISTER FORM -->
+            <div class="auth-form" id="registerForm">
+                <div>
+                    <label class="form-label">Full Name</label>
+                    <input type="text" id="regName" class="auth-input" placeholder="Your full name" autocomplete="name">
+                    <p class="auth-error" id="regNameError">Name is required</p>
+                </div>
+                <div style="margin-top:12px">
+                    <label class="form-label">Username</label>
+                    <input type="text" id="regUsername" class="auth-input" placeholder="Choose a username" autocomplete="username" style="text-transform:lowercase">
+                    <p class="auth-error" id="regUserError">Username required (min 3 chars)</p>
+                </div>
+                <div style="margin-top:12px">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="regPassword" class="auth-input" placeholder="Create a password (min 6)" autocomplete="new-password">
+                    <p class="auth-error" id="regPassError">Password required (min 6 chars)</p>
+                </div>
+                <div style="margin-top:12px">
+                    <label class="form-label">Confirm Password</label>
+                    <input type="password" id="regConfirmPass" class="auth-input" placeholder="Re-enter password" autocomplete="new-password">
+                    <p class="auth-error" id="regConfirmError">Passwords do not match</p>
+                </div>
+                <button id="registerBtn" class="btn-primary-solid flex items-center justify-center gap-2" style="margin-top:20px" onclick="handleRegister()">
+                    <i class="fas fa-user-plus text-xs"></i>
+                    <span id="regBtnText">CREATE ACCOUNT</span>
+                </button>
+                <div class="auth-divider">OR</div>
+                <button class="auth-tg-btn" onclick="loginWithTelegram()">
+                    <i class="fab fa-telegram text-[#2AABEE] text-lg"></i>
+                    Sign Up with Telegram
+                </button>
+            </div>
+        </div>
+
+        <p class="text-[10px] mt-6 text-center font-semibold" style="color:var(--text-muted)">By continuing, you agree to our Terms of Service</p>
+    </div>
+
+    <!-- SPLASH -->
+    <div id="splashScreen" class="fixed inset-0 z-[9999] splash-bg flex flex-col items-center justify-center">
+        <div class="splash-icon w-24 h-24 rounded-[28px] flex items-center justify-center animate-bounce">
+            <i class="fas fa-bolt text-white text-4xl"></i>
+        </div>
+        <h1 class="mt-6 text-2xl font-black text-white tracking-tight">FIRST SMM</h1>
+        <p class="text-slate-500 text-[10px] font-bold mt-1.5 tracking-widest uppercase">Bangladesh's #1 Panel</p>
+        <div class="splash-loader mt-8"><div class="splash-loader-fill"></div></div>
+    </div>
+
+    <div class="pb-32" id="mainApp" style="display:none">
+        <!-- HEADER -->
+        <header class="premium-header px-5 pt-7 pb-7">
+            <div class="flex items-center justify-between mb-6 relative z-10">
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <img id="userAvatar" src="" class="w-12 h-12 rounded-xl object-cover shadow-lg" style="border:2px solid rgba(255,255,255,0.12)" alt="Avatar">
+                        <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-md flex items-center justify-center border-2" style="border-color:var(--bg-main)"><i class="fas fa-check text-white text-[6px]"></i></div>
+                    </div>
+                    <div>
+                        <h3 id="userFullName" class="font-extrabold text-base tracking-tight text-white">Loading...</h3>
+                        <div class="flex items-center gap-1.5 text-slate-400 text-[10px] font-mono">
+                            <i class="fas fa-fingerprint text-[8px] text-emerald-400"></i>
+                            <span id="userIdDisplay">ID: ...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button id="notifToastBtn" class="w-10 h-10 bg-white/5 border border-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center text-white relative cursor-pointer">
+                        <i class="fas fa-bell text-sm"></i>
+                        <div class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-slate-900" id="notifDot"></div>
+                    </button>
+                    <button id="logoutBtn" class="w-10 h-10 bg-white/5 border border-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center text-white relative cursor-pointer">
+                        <i class="fas fa-sign-out-alt text-sm"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 relative z-10">
+                <div class="stat-card">
+                    <div class="flex items-center gap-2 mb-1.5">
+                        <div class="w-6 h-6 bg-emerald-500/20 rounded-lg flex items-center justify-center"><i class="fas fa-wallet text-emerald-400 text-[10px]"></i></div>
+                        <p class="text-[9px] font-bold uppercase tracking-widest text-slate-400">Balance</p>
+                    </div>
+                    <h2 id="globalBalance" class="text-xl font-black text-white tracking-tight">৳ 0.00</h2>
+                </div>
+                <div class="stat-card">
+                    <div class="flex items-center gap-2 mb-1.5">
+                        <div class="w-6 h-6 bg-indigo-500/20 rounded-lg flex items-center justify-center"><i class="fas fa-box text-indigo-400 text-[10px]"></i></div>
+                        <p class="text-[9px] font-bold uppercase tracking-widest text-slate-400">Orders</p>
+                    </div>
+                    <h2 id="globalTotalOrders" class="text-xl font-black text-white tracking-tight">0</h2>
+                </div>
+            </div>
+        </header>
+
+        <!-- HOME -->
+        <section id="homeSection" class="page-section active px-5 mt-5">
+            <div class="grid grid-cols-4 gap-2.5 mb-6">
+                <div class="social-icon-box icon-fb"><i class="fab fa-facebook-f"></i></div>
+                <div class="social-icon-box icon-ig"><i class="fab fa-instagram"></i></div>
+                <div class="social-icon-box icon-tt"><i class="fab fa-tiktok"></i></div>
+                <div class="social-icon-box icon-yt"><i class="fab fa-youtube"></i></div>
+                <div class="social-icon-box icon-tw"><i class="fab fa-twitter"></i></div>
+                <div class="social-icon-box icon-li"><i class="fab fa-linkedin-in"></i></div>
+                <div class="social-icon-box icon-sc"><i class="fab fa-snapchat-ghost"></i></div>
+                <div class="social-icon-box icon-tp"><i class="fab fa-telegram-plane"></i></div>
+            </div>
+
+            <div class="glass-card p-5 mb-5">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-9 h-9 bg-emerald-500/15 rounded-xl flex items-center justify-center text-emerald-400"><i class="fas fa-cart-plus text-sm"></i></div>
+                        <h3 class="font-extrabold text-sm">New Order</h3>
+                    </div>
+                    <div class="text-[8px] font-black text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-md tracking-wider">INSTANT</div>
+                </div>
+
+                <div class="step-indicator" id="stepIndicator">
+                    <div class="step-dot active" data-step="1"></div>
+                    <div class="step-line"><div class="step-line-fill" id="line1" style="width:0%"></div></div>
+                    <div class="step-dot" data-step="2"></div>
+                    <div class="step-line"><div class="step-line-fill" id="line2" style="width:0%"></div></div>
+                    <div class="step-dot" data-step="3"></div>
+                    <div class="step-line"><div class="step-line-fill" id="line3" style="width:0%"></div></div>
+                    <div class="step-dot" data-step="4"></div>
+                    <div class="step-line"><div class="step-line-fill" id="line4" style="width:0%"></div></div>
+                    <div class="step-dot" data-step="5"></div>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="form-label"><i class="fas fa-folder-open mr-1 text-[8px]"></i> 1. Category</label>
+                        <div class="relative">
+                            <select id="categorySelect" class="input-modern appearance-none pr-8">
+                                <option value="" disabled selected>Choose category...</option>
+                            </select>
+                            <i class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none text-[10px]"></i>
+                        </div>
+                        <p class="field-error" id="catError">Please select a category</p>
+                    </div>
+                    <div>
+                        <label class="form-label"><i class="fas fa-magic mr-1 text-[8px]"></i> 2. Service</label>
+                        <div class="relative">
+                            <select id="serviceSelect" class="input-modern appearance-none pr-8">
+                                <option value="" disabled selected>Select category first</option>
+                            </select>
+                            <i class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none text-[10px]"></i>
+                        </div>
+                        <p class="field-error" id="svcError">Please select a service</p>
+                    </div>
+                    <div id="serviceInfoBox" class="hidden bg-emerald-500/5 border border-emerald-500/10 rounded-xl p-3">
+                        <div class="flex items-start gap-2"><i class="fas fa-info-circle text-emerald-400 text-xs mt-0.5"></i><p id="serviceDescriptionText" class="text-[11px] font-medium text-slate-400 leading-relaxed"></p></div>
+                    </div>
+                    <div id="serviceMinMaxBox" class="hidden bg-blue-500/5 border border-blue-500/10 rounded-xl p-3 flex justify-between items-center">
+                        <div class="text-center"><p class="text-[8px] font-bold text-blue-400/70 uppercase">Min</p><p class="font-extrabold text-sm text-blue-300" id="svcMin">-</p></div>
+                        <div class="w-px h-6 bg-blue-500/15"></div>
+                        <div class="text-center"><p class="text-[8px] font-bold text-blue-400/70 uppercase">Max</p><p class="font-extrabold text-sm text-blue-300" id="svcMax">-</p></div>
+                        <div class="w-px h-6 bg-blue-500/10"></div>
+                        <div class="text-center"><p class="text-[8px] font-bold text-emerald-400/70 uppercase">Rate</p><p class="font-extrabold text-sm text-emerald-300" id="svcRate">-</p></div>
+                    </div>
+                    <div>
+                        <label class="form-label"><i class="fas fa-link mr-1 text-[8px]"></i> 3. Target Link</label>
+                        <input type="text" id="targetUrl" class="input-modern" placeholder="https://facebook.com/username">
+                        <p class="field-error" id="linkError">Please enter a valid link</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="form-label"><i class="fas fa-hashtag mr-1 text-[8px]"></i> 4. Quantity</label>
+                            <input type="number" id="orderQuantity" class="input-modern" value="100" min="10">
+                            <p class="min-max-hint" id="qtyHint"></p>
+                            <p class="field-error" id="qtyError">Invalid quantity</p>
+                        </div>
+                        <div>
+                            <label class="form-label"><i class="fas fa-coins mr-1 text-[8px]"></i> 5. Cost</label>
+                            <div class="price-preview-box" id="pricePreview"><span class="text-lg font-black text-emerald-400">৳ 0.00</span></div>
+                            <p class="text-[8px] text-slate-600 text-center mt-1" id="balanceCheck"></p>
+                        </div>
+                    </div>
+                    <button id="placeOrderBtn" class="btn-primary-solid flex items-center justify-center gap-2">
+                        <i class="fas fa-paper-plane text-xs" id="orderBtnIcon"></i>
+                        <span id="orderBtnText">PLACE ORDER NOW</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="glass-card p-4 flex gap-3 items-center" style="background:rgba(16,185,129,0.05);border-color:rgba(16,185,129,0.1)">
+                <div class="w-10 h-10 bg-emerald-500/15 rounded-xl flex items-center justify-center text-emerald-400 flex-shrink-0"><i class="fas fa-shield-alt text-lg"></i></div>
+                <div><h4 class="font-bold text-xs">100% Secure & Refundable</h4><p class="text-[10px] text-slate-500">Failed orders = automatic refund to balance.</p></div>
+            </div>
+
+            <div class="mt-4 glass-card p-4" style="background:rgba(59,130,246,0.04);border-color:rgba(59,130,246,0.08)">
+                <h4 class="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-2"><i class="fas fa-lightbulb mr-1"></i> Quick Tips</h4>
+                <ul class="space-y-1.5">
+                    <li class="text-[10px] text-slate-500 flex items-start gap-2"><span class="text-blue-400 mt-0.5">•</span> Always paste the correct profile/post link</li>
+                    <li class="text-[10px] text-slate-500 flex items-start gap-2"><span class="text-blue-400 mt-0.5">•</span> Check min/max quantity before ordering</li>
+                    <li class="text-[10px] text-slate-500 flex items-start gap-2"><span class="text-blue-400 mt-0.5">•</span> Insufficient balance? Add funds first</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- ORDERS -->
+        <section id="ordersSection" class="page-section px-5">
+            <div class="flex justify-between items-center mb-5 mt-1">
+                <h2 class="section-title">My Orders</h2>
+                <div class="live-badge">LIVE</div>
+            </div>
+            <div id="ordersContainer" class="space-y-3 pb-4">
+                <div class="empty-state"><i class="fas fa-receipt"></i><p>No orders yet</p><p class="text-[10px] mt-1 font-normal">Place your first order from Home</p></div>
+            </div>
+        </section>
+
+        <!-- FUNDS -->
+        <section id="fundsSection" class="page-section px-5">
+            <h2 class="section-title mb-5 mt-1">Add Funds</h2>
+            <div class="glass-card p-6 text-center mb-5 relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent pointer-events-none"></div>
+                <div class="relative z-10">
+                    <div class="w-16 h-16 bg-emerald-500/15 rounded-2xl flex items-center justify-center mx-auto text-emerald-400 text-2xl mb-3"><i class="fas fa-coins"></i></div>
+                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Current Balance</p>
+                    <h2 id="fundsPageBalance" class="text-3xl font-black tracking-tight">৳ 0.00</h2>
+                </div>
+            </div>
+            <div class="flex gap-2 mb-4">
+                <button class="quick-amount-btn deposit-method flex-1 text-center" data-amount="100">৳100</button>
+                <button class="quick-amount-btn deposit-method flex-1 text-center" data-amount="200">৳200</button>
+                <button class="quick-amount-btn deposit-method flex-1 text-center" data-amount="500">৳500</button>
+                <button class="quick-amount-btn deposit-method flex-1 text-center" data-amount="1000">৳1K</button>
+            </div>
+            <div class="flex gap-2 mb-4">
+                <div class="deposit-method active-method flex-1 text-center" data-method="bkash"><i class="fas fa-mobile-alt mr-1"></i>bKash</div>
+                <div class="deposit-method flex-1 text-center" data-method="nagad"><i class="fas fa-mobile-alt mr-1"></i>Nagad</div>
+                <div class="deposit-method flex-1 text-center" data-method="rocket"><i class="fas fa-rocket mr-1"></i>Rocket</div>
+            </div>
+            <div class="glass-card p-4 flex items-center justify-between mb-4">
+                <div class="flex gap-3 items-center">
+                    <div class="w-10 h-10 bg-pink-500/15 rounded-xl flex items-center justify-center text-pink-400 text-lg font-black" id="paymentMethodIcon">b</div>
+                    <div>
+                        <p class="text-[9px] font-bold text-slate-500 uppercase" id="paymentMethodLabel">bKash Merchant</p>
+                        <p class="font-bold text-base tracking-wide" id="paymentNumberDisplay">01888-888888</p>
+                    </div>
+                </div>
+                <button class="copy-btn" id="copyNumberBtn"><i class="fas fa-copy mr-1"></i> COPY</button>
+            </div>
+            <div class="glass-card p-5 space-y-4">
+                <div><label class="form-label"><i class="fas fa-money-bill mr-1 text-[8px]"></i> Amount (BDT)</label><input type="number" id="depositAmount" class="input-modern" placeholder="Enter amount (min ৳ 50)"><p class="field-error" id="depAmtError">Minimum amount is ৳ 50</p></div>
+                <div><label class="form-label"><i class="fas fa-receipt mr-1 text-[8px]"></i> Transaction ID</label><input type="text" id="depositTrxId" class="input-modern" placeholder="e.g., BKASH8S7D6F" style="text-transform:uppercase"><p class="field-error" id="depTrxError">Transaction ID is required</p></div>
+                <button id="requestDepositBtn" class="btn-secondary-solid flex items-center justify-center gap-2"><i class="fas fa-paper-plane text-xs" id="depBtnIcon"></i><span id="depositBtnText">SUBMIT REQUEST</span></button>
+            </div>
+            <div class="mt-4 p-3 rounded-xl bg-amber-500/5 border border-amber-500/10 flex gap-2 items-start">
+                <i class="fas fa-exclamation-triangle text-amber-500 mt-0.5 text-xs"></i>
+                <p class="text-[10px] text-amber-400/70 leading-relaxed">Send money to the number above first, then submit your Transaction ID. Admin will verify and add balance after approval.</p>
+            </div>
+            <div class="mt-6 mb-2">
+                <h3 class="text-xs font-extrabold text-slate-500 uppercase tracking-widest mb-3"><i class="fas fa-history mr-1"></i> Recent Requests</h3>
+                <div id="depositHistoryContainer"><p class="text-[11px] text-slate-600 text-center py-3">No requests yet</p></div>
+            </div>
+        </section>
+
+        <!-- SUPPORT -->
+        <section id="supportSection" class="page-section px-5">
+            <h2 class="section-title mb-5 mt-1">Support</h2>
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <div class="glass-card p-5 text-center cursor-pointer active:scale-95 transition">
+                    <div class="w-12 h-12 bg-blue-500/15 rounded-xl flex items-center justify-center mx-auto text-blue-400 text-xl mb-2"><i class="fab fa-telegram"></i></div>
+                    <h3 class="font-bold text-xs">Telegram</h3><p class="text-[9px] text-slate-500 mt-0.5">Chat with Admin</p>
+                </div>
+                <div class="glass-card p-5 text-center cursor-pointer active:scale-95 transition">
+                    <div class="w-12 h-12 bg-green-500/15 rounded-xl flex items-center justify-center mx-auto text-green-400 text-xl mb-2"><i class="fab fa-whatsapp"></i></div>
+                    <h3 class="font-bold text-xs">WhatsApp</h3><p class="text-[9px] text-slate-500 mt-0.5">24/7 Available</p>
+                </div>
+            </div>
+            <div class="glass-card overflow-hidden mb-4">
+                <div class="px-4 py-2.5" style="border-bottom:1px solid var(--border-color)"><h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest"><i class="fas fa-question-circle mr-1"></i> FAQ</h4></div>
+                <div class="px-4 py-3.5 cursor-pointer" style="border-bottom:1px solid var(--border-color)" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center"><span class="font-semibold text-xs">How to add balance?</span><i class="fas fa-chevron-down text-[8px] text-slate-600 transition-transform"></i></div>
+                    <p class="text-[10px] text-slate-500 mt-2 leading-relaxed hidden">Go to Funds tab, select payment method, send money to the given number, then submit your Transaction ID. Admin will approve and add balance.</p>
+                </div>
+                <div class="px-4 py-3.5 cursor-pointer" style="border-bottom:1px solid var(--border-color)" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center"><span class="font-semibold text-xs">Order not starting?</span><i class="fas fa-chevron-down text-[8px] text-slate-600 transition-transform"></i></div>
+                    <p class="text-[10px] text-slate-500 mt-2 leading-relaxed hidden">Orders usually start within 0-30 minutes. If delayed, contact support via Telegram with your Order ID.</p>
+                </div>
+                <div class="px-4 py-3.5 cursor-pointer" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center"><span class="font-semibold text-xs">Can I get a refund?</span><i class="fas fa-chevron-down text-[8px] text-slate-600 transition-transform"></i></div>
+                    <p class="text-[10px] text-slate-500 mt-2 leading-relaxed hidden">Yes! If an order fails or drops significantly, you'll get an automatic refund to your balance.</p>
+                </div>
+            </div>
+            <div class="glass-card overflow-hidden">
+                <div class="px-4 py-2.5" style="border-bottom:1px solid var(--border-color)"><h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Links</h4></div>
+                <div class="flex justify-between items-center px-4 py-3.5 cursor-pointer active:bg-white/5" style="border-bottom:1px solid var(--border-color)" onclick="copyText('https://t.me/firstsmmgroup')">
+                    <div class="flex items-center gap-2.5"><i class="fab fa-telegram text-blue-400 text-sm"></i><span class="font-semibold text-xs">Telegram Group</span></div><i class="fas fa-copy text-[10px] text-slate-600"></i>
+                </div>
+                <div class="flex justify-between items-center px-4 py-3.5 cursor-pointer active:bg-white/5" onclick="copyText('https://fb.me/firstsmmpanelbd')">
+                    <div class="flex items-center gap-2.5"><i class="fab fa-facebook text-blue-500 text-sm"></i><span class="font-semibold text-xs">Facebook Page</span></div><i class="fas fa-copy text-[10px] text-slate-600"></i>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- NAV -->
+    <nav class="bottom-nav-premium" id="bottomNav" style="display:none">
+        <div class="nav-item-premium active" data-page="home"><i class="fas fa-home"></i><span>Home</span></div>
+        <div class="nav-item-premium" data-page="orders"><i class="fas fa-list-check"></i><span>Orders</span></div>
+        <div class="nav-item-premium" data-page="funds"><i class="fas fa-wallet"></i><span>Funds</span></div>
+        <div class="nav-item-premium" data-page="support"><i class="fas fa-headset"></i><span>Support</span></div>
+    </nav>
+
+    <script type="importmap">
+    {"imports":{"firebase/app":"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js","firebase/firestore":"https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"}}
+    </script>
+
+    <script type="module">
+        import{initializeApp}from"firebase/app";
+        import{getFirestore,doc,collection,onSnapshot,setDoc,updateDoc,addDoc,serverTimestamp,query,where,orderBy,getDoc,getDocs}from"firebase/firestore";
+
+        const firebaseConfig={
+            apiKey:"AIzaSyCdPFDGIxUBDi3C-ES9I18LsNy_621Bf_s",
+            authDomain:"takahubpro.firebaseapp.com",
+            projectId:"takahubpro",
+            storageBucket:"takahubpro.firebasestorage.app",
+            messagingSenderId:"683565669304",
+            appId:"1:683565669304:web:acc776890740c726b20d4d"
+        };
+        const app=initializeApp(firebaseConfig);
+        const db=getFirestore(app);
+
+        const tg=window.Telegram?.WebApp||null;
+        let currentUserId="",allServices=[],userBalance=0,userTotalOrders=0,isSubmitting=false,isDepSubmitting=false;
+        let currentServiceData=null;
+        let isLoggedIn=false;
+        let currentUserData=null;
+
+        // ==========================================
+        // টেলিগ্রাম সেটআপ
+        // ==========================================
+        function setupTelegramMiniApp(){
+            if(!tg)return;
+            try{tg.ready();tg.expand()}catch(e){}
+        }
+
+        function haptic(type='light'){
+            if(!tg?.HapticFeedback)return;
+            try{
+                if(type==='success')tg.HapticFeedback.notificationOccurred('success');
+                else if(type==='error')tg.HapticFeedback.notificationOccurred('error');
+                else if(type==='heavy')tg.HapticFeedback.impactOccurred('heavy');
+                else tg.HapticFeedback.impactOccurred('light');
+            }catch(e){}
+        }
+
+        // ==========================================
+        // টোস্ট সিস্টেম
+        // ==========================================
+        function showToast(message,type='info',duration=3000){
+            const container=document.getElementById('toastContainer');
+            const toast=document.createElement('div');
+            toast.className=`toast-item toast-${type}`;
+            const icons={success:'fa-check-circle',error:'fa-times-circle',warning:'fa-exclamation-triangle',info:'fa-info-circle'};
+            toast.innerHTML=`<i class="fas ${icons[type]||icons.info}"></i><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(()=>{toast.classList.add('toast-out');setTimeout(()=>toast.remove(),300)},duration);
+        }
+
+        // ==========================================
+        // কাস্টম মোডাল
+        // ==========================================
+        function showModalConfirm(title,bodyHtml,onConfirm){
+            document.getElementById('modalTitle').innerText=title;
+            document.getElementById('modalBody').innerHTML=bodyHtml;
+            const overlay=document.getElementById('confirmModal');
+            overlay.classList.add('show');
+            const cb=document.getElementById('modalConfirmBtn');
+            const cc=document.getElementById('modalCancelBtn');
+            function cleanup(){overlay.classList.remove('show');cb.replaceWith(cb.cloneNode(true));cc.replaceWith(cc.cloneNode(true))}
+            document.getElementById('modalConfirmBtn').addEventListener('click',()=>{cleanup();onConfirm()});
+            document.getElementById('modalCancelBtn').addEventListener('click',()=>cleanup());
+            overlay.addEventListener('click',(e)=>{if(e.target===overlay)cleanup()},{once:true});
+        }
+
+        // ==========================================
+        // গ্লোবাল হেল্পার
+        // ==========================================
+        window.copyText=function(text){
+            navigator.clipboard.writeText(text).then(()=>{haptic('success');showToast('Copied!','success',2000)}).catch(()=>showToast('Failed to copy','error'));
+        };
+        window.toggleFaq=function(el){
+            const p=el.querySelector('p'),icon=el.querySelector('.fa-chevron-down');
+            if(p.classList.contains('hidden')){p.classList.remove('hidden');if(icon)icon.style.transform='rotate(180deg)'}
+            else{p.classList.add('hidden');if(icon)icon.style.transform='rotate(0deg)'}
+        };
+
+        // ==========================================
+        // AUTH TAB SWITCH
+        // ==========================================
+        window.switchAuthTab=function(tab){
+            document.querySelectorAll('.auth-tab-btn').forEach(b=>b.classList.remove('active-tab'));
+            document.querySelectorAll('.auth-form').forEach(f=>f.classList.remove('active-form'));
+            document.querySelectorAll('.auth-error').forEach(e=>e.classList.remove('show'));
+            if(tab==='login'){
+                document.getElementById('loginTabBtn').classList.add('active-tab');
+                document.getElementById('loginForm').classList.add('active-form');
+            }else{
+                document.getElementById('registerTabBtn').classList.add('active-tab');
+                document.getElementById('registerForm').classList.add('active-form');
+            }
+        };
+
+        function shakeAuthInput(el){el.classList.add('error-shake');setTimeout(()=>el.classList.remove('error-shake'),400)}
+        function showAuthError(id,msg){const el=document.getElementById(id);if(msg)el.innerText=msg;el.classList.add('show')}
+        function clearAuthErrors(){document.querySelectorAll('.auth-error').forEach(e=>e.classList.remove('show'))}
+
+        // ==========================================
+        // পাসওয়ার্ড হ্যাশ (সিম্পল — প্রোডাকশনে bcrypt ব্যবহার করবে)
+        // ==========================================
+        async function simpleHash(str){
+            const encoder=new TextEncoder();
+            const data=encoder.encode(str+'firstsmm_salt_2024');
+            const hashBuffer=await crypto.subtle.digest('SHA-256',data);
+            const hashArray=Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b=>b.toString(16).padStart(2,'0')).join('');
+        }
+
+        // ==========================================
+        // REGISTER
+        // ==========================================
+        window.handleRegister=async function(){
+            if(isSubmitting)return;
+            clearAuthErrors();
+            const name=document.getElementById('regName').value.trim();
+            const username=document.getElementById('regUsername').value.trim().toLowerCase().replace(/[^a-z0-9_]/g,'');
+            const password=document.getElementById('regPassword').value;
+            const confirmPass=document.getElementById('regConfirmPass').value;
+            let hasError=false;
+
+            if(!name||name.length<2){showAuthError('regNameError','Name is required (min 2 chars)');shakeAuthInput(document.getElementById('regName'));hasError=true}
+            if(!username||username.length<3){showAuthError('regUserError','Username required (min 3 chars, letters/numbers)');shakeAuthInput(document.getElementById('regUsername'));hasError=true}
+            if(!password||password.length<6){showAuthError('regPassError','Password required (min 6 chars)');shakeAuthInput(document.getElementById('regPassword'));hasError=true}
+            if(password!==confirmPass){showAuthError('regConfirmError','Passwords do not match');shakeAuthInput(document.getElementById('regConfirmPass'));hasError=true}
+            if(hasError){haptic('error');return}
+
+            isSubmitting=true;haptic('heavy');
+            const btn=document.getElementById('registerBtn');
+            const txt=document.getElementById('regBtnText');
+            txt.innerHTML='<span class="loading-spinner"></span>';btn.disabled=true;
+
+            try{
+                // চেক করি username আগে থেকে আছে কিনা
+                const q=query(collection(db,"auth_users"),where("username","==",username));
+                const existing=await getDocs(q);
+                if(!existing.empty){showAuthError('regUserError','This username is already taken');shakeAuthInput(document.getElementById('regUsername'));haptic('error');txt.innerHTML='CREATE ACCOUNT';btn.disabled=false;isSubmitting=false;return}
+
+                const hashedPass=await simpleHash(password);
+                const newDoc=doc(collection(db,"auth_users"));
+                const uid=newDoc.id;
+
+                await setDoc(newDoc,{
+                    username,name,password:hashedPass,
+                    createdAt:serverTimestamp(),
+                    telegramId:tg?.initDataUnsafe?.user?.id||null
+                });
+
+                // users কালেকশনেও এন্ট্রি
+                await setDoc(doc(db,"users",uid),{
+                    name,balance:0,total_orders:0,
+                    createdAt:serverTimestamp()
+                },{merge:true});
+
+                // অটো লগইন
+                currentUserData={uid,username,name};
+                localStorage.setItem('smm_session',JSON.stringify(currentUserData));
+                haptic('success');showToast('Account created successfully!','success');
+                enterApp(uid,name,username);
+
+            }catch(e){
+                console.error('Register error:',e);
+                haptic('error');showToast('Registration failed. Try again.','error');
+            }finally{txt.innerHTML='CREATE ACCOUNT';btn.disabled=false;isSubmitting=false}
+        };
+
+        // ==========================================
+        // LOGIN
+        // ==========================================
+        window.handleLogin=async function(){
+            if(isSubmitting)return;
+            clearAuthErrors();
+            const username=document.getElementById('loginUsername').value.trim().toLowerCase();
+            const password=document.getElementById('loginPassword').value;
+            let hasError=false;
+
+            if(!username||username.length<1){showAuthError('loginUserError','Username is required');shakeAuthInput(document.getElementById('loginUsername'));hasError=true}
+            if(!password){showAuthError('loginPassError','Password is required');shakeAuthInput(document.getElementById('loginPassword'));hasError=true}
+            if(hasError){haptic('error');return}
+
+            isSubmitting=true;haptic('heavy');
+            const btn=document.getElementById('loginBtn');
+            const txt=document.getElementById('loginBtnText');
+            txt.innerHTML='<span class="loading-spinner"></span>';btn.disabled=true;
+
+            try{
+                const q=query(collection(db,"auth_users"),where("username","==",username));
+                const snap=await getDocs(q);
+
+                if(snap.empty){
+                    showAuthError('loginUserError','Account not found. Register first.');
+                    shakeAuthInput(document.getElementById('loginUsername'));haptic('error');
+                    txt.innerHTML='LOGIN';btn.disabled=false;isSubmitting=false;return;
+                }
+
+                const userDoc=snap.docs[0];
+                const userData=userDoc.data();
+                const hashedPass=await simpleHash(password);
+
+                if(userData.password!==hashedPass){
+                    showAuthError('loginPassError','Wrong password');
+                    shakeAuthInput(document.getElementById('loginPassword'));haptic('error');
+                    txt.innerHTML='LOGIN';btn.disabled=false;isSubmitting=false;return;
+                }
+
+                currentUserData={uid:userDoc.id,username:userData.username,name:userData.name};
+                localStorage.setItem('smm_session',JSON.stringify(currentUserData));
+                haptic('success');showToast(`Welcome back, ${userData.name}!`,'success');
+                enterApp(userDoc.id,userData.name,userData.username);
+
+            }catch(e){
+                console.error('Login error:',e);haptic('error');showToast('Login failed. Try again.','error');
+            }finally{txt.innerHTML='LOGIN';btn.disabled=false;isSubmitting=false}
+        };
+
+        // ==========================================
+        // TELEGRAM লগইন/রেজিস্টার
+        // ==========================================
+        window.loginWithTelegram=async function(){
+            if(!tg?.initDataUnsafe?.user){showToast('Open this app from Telegram','warning');return}
+            haptic('heavy');
+            const tgUser=tg.initDataUnsafe.user;
+            const username=tgUser.username||`tg_${tgUser.id}`;
+            const name=tgUser.first_name||'Telegram User';
+
+            try{
+                // টেলিগ্রাম ID দিয়ে চেক
+                const q=query(collection(db,"auth_users"),where("telegramId","==",tgUser.id));
+                const snap=await getDocs(q);
+
+                if(!snap.empty){
+                    // আগে থেকেই আছে → লগইন
+                    const userDoc=snap.docs[0];
+                    const userData=userDoc.data();
+                    currentUserData={uid:userDoc.id,username:userData.username,name:userData.name};
+                    localStorage.setItem('smm_session',JSON.stringify(currentUserData));
+                    haptic('success');showToast(`Welcome, ${userData.name}!`,'success');
+                    enterApp(userDoc.id,userData.name,userData.username);
+                }else{
+                    // নতুন → রেজিস্টার তারপর লগইন
+                    const cleanUsername=username.toLowerCase().replace(/[^a-z0-9_]/g,'');
+                    const finalUsername=cleanUsername.length>=3?cleanUsername:`tg_${tgUser.id.toString().slice(-6)}`;
+                    const newDoc=doc(collection(db,"auth_users"));
+                    const uid=newDoc.id;
+                    await setDoc(newDoc,{
+                        username:finalUsername,name,password:'',createdAt:serverTimestamp(),telegramId:tgUser.id
+                    });
+                    await setDoc(doc(db,"users",uid),{name,balance:0,total_orders:0,createdAt:serverTimestamp()},{merge:true});
+                    currentUserData={uid,username:finalUsername,name};
+                    localStorage.setItem('smm_session',JSON.stringify(currentUserData));
+                    haptic('success');showToast('Telegram account connected!','success');
+                    enterApp(uid,name,finalUsername);
+                }
+            }catch(e){
+                console.error('TG login error:',e);haptic('error');showToast('Failed to connect Telegram','error');
+            }
+        };
+
+        // ==========================================
+        // লগআউট
+        // ==========================================
+        function handleLogout(){
+            showModalConfirm('Logout','Are you sure you want to logout?',()=>{
+                localStorage.removeItem('smm_session');
+                isLoggedIn=false;currentUserData=null;currentUserId='';
+                document.getElementById('mainApp').style.display='none';
+                document.getElementById('bottomNav').style.display='none';
+                document.getElementById('authScreen').classList.add('visible');
+                // ফর্ম ক্লিয়ার
+                document.getElementById('loginUsername').value='';
+                document.getElementById('loginPassword').value='';
+                document.getElementById('regName').value='';
+                document.getElementById('regUsername').value='';
+                document.getElementById('regPassword').value='';
+                document.getElementById('regConfirmPass').value='';
+                clearAuthErrors();
+                switchAuthTab('login');
+                showToast('Logged out','info',2000);
+            });
+        }
+
+        // ==========================================
+        // অ্যাপে প্রবেশ
+        // ==========================================
+        function enterApp(uid,name,username){
+            isLoggedIn=true;
+            document.getElementById('authScreen').classList.remove('visible');
+            document.getElementById('mainApp').style.display='block';
+            document.getElementById('bottomNav').style.display='flex';
+
+            const u=tg?.initDataUnsafe?.user||{photo_url:''};
+            document.getElementById('userAvatar').src=u.photo_url||`https://ui-avatars.com/api/?name=${encodeURIComponent(name||'U')}&background=10b981&color=fff&size=128&font-size=0.4&bold=true`;
+            document.getElementById('userFullName').innerText=name||'User';
+            document.getElementById('userIdDisplay').innerText=`@${username||uid.slice(0,8)}`;
+
+            setTimeout(()=>{const dot=document.getElementById('notifDot');if(dot)dot.style.display='none'},3000);
+            initUser(uid);
+            loadServicesList();
+            listenUserOrders(uid);
+            listenDepositRequests(uid);
+            updateStepIndicator(1);
+        }
+
+        // ==========================================
+        // পেমেন্ট মেথড
+        // ==========================================
+        const paymentMethods={
+            bkash:{label:'bKash Merchant',number:'01716870009',icon:'b'},
+            nagad:{label:'Nagad Merchant',number:'01716870009',icon:'N'},
+            rocket:{label:'Rocket Personal',number:'01820262343',icon:'R'}
+        };
+        let selectedPaymentMethod='bkash';
+
+        document.querySelectorAll('.deposit-method[data-method]').forEach(btn=>{
+            btn.addEventListener('click',()=>{
+                haptic('light');
+                document.querySelectorAll('.deposit-method[data-method]').forEach(b=>b.classList.remove('active-method'));
+                btn.classList.add('active-method');
+                selectedPaymentMethod=btn.getAttribute('data-method');
+                const m=paymentMethods[selectedPaymentMethod];
+                document.getElementById('paymentMethodLabel').innerText=m.label;
+                document.getElementById('paymentNumberDisplay').innerText=m.number;
+                document.getElementById('paymentMethodIcon').innerText=m.icon;
+            });
+        });
+        document.querySelectorAll('.quick-amount-btn').forEach(btn=>{
+            btn.addEventListener('click',()=>{haptic('light');document.getElementById('depositAmount').value=btn.getAttribute('data-amount')});
+        });
+        document.getElementById('copyNumberBtn').addEventListener('click',()=>{copyText(paymentMethods[selectedPaymentMethod].number.replace(/-/g,''))});
+
+        // ==========================================
+        // ইউজার ইনিট — ফিক্সড (ব্যালেন্স ০ হওয়ার সমস্যা সমাধান)
+        // ==========================================
+        async function initUser(uid){
+            currentUserId=uid;
+            const userRef=doc(db,"users",uid);
+            const snap=await getDoc(userRef);
+            
+            if(!snap.exists()){
+                // ইউজার ডকুমেন্ট যদি আগে থেকে না থাকে, তবেই নতুন করে ০ ব্যালেন্স সেট করবে
+                await setDoc(userRef,{
+                    name:currentUserData?.name||"User",
+                    balance:0,total_orders:0,
+                    createdAt:serverTimestamp()
+                });
+            }
+            
+            // রিয়েলটাইম লিসেনার সেট করি
+            onSnapshot(userRef,(docSnap)=>{
+                if(docSnap.exists()){
+                    const d=docSnap.data();
+                    userBalance=d.balance||0;
+                    userTotalOrders=d.total_orders||0;
+                    updateUserUI();
+                }
+            });
+        }
+
+        function updateUserUI(){
+            document.getElementById('globalBalance').innerText=`৳ ${userBalance.toFixed(2)}`;
+            document.getElementById('globalTotalOrders').innerText=userTotalOrders;
+            document.getElementById('fundsPageBalance').innerText=`৳ ${userBalance.toFixed(2)}`;
+        }
+
+        // ==========================================
+        // ডিপোজিট লিসেনার
+        // ==========================================
+        function listenDepositRequests(uid){
+            const q=query(collection(db,"deposit_requests"),where("uid","==",uid),orderBy("timestamp","desc"));
+            onSnapshot(q,(snapshot)=>{
+                const container=document.getElementById('depositHistoryContainer');
+                const deps=[];snapshot.forEach(d=>deps.push({id:d.id,...d.data()}));
+                if(!deps.length){container.innerHTML=`<p class="text-[11px] text-slate-600 text-center py-3">No requests yet</p>`;return}
+                container.innerHTML="";
+                deps.forEach(dep=>{
+                    let stColor='text-amber-400 bg-amber-500/10',stText='Pending',stIcon='fa-clock';
+                    if(dep.status==='Approved'){stColor='text-emerald-400 bg-emerald-500/10';stText='Approved';stIcon='fa-check-circle'}
+                    else if(dep.status==='Rejected'){stColor='text-red-400 bg-red-500/10';stText='Rejected';stIcon='fa-times-circle'}
+                    const date=dep.timestamp?new Date(dep.timestamp.seconds*1000).toLocaleString('en-BD',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'Just now';
+                    container.innerHTML+=`<div class="deposit-history-card"><div class="flex justify-between items-center mb-1.5"><span class="text-[9px] text-slate-500 font-mono">${date}</span><span class="text-[8px] font-bold px-2 py-0.5 rounded-md ${stColor}"><i class="fas ${stIcon} mr-1 text-[7px]"></i>${stText}</span></div><div class="flex justify-between items-center"><span class="text-[10px] text-slate-500 font-bold uppercase">${dep.method||'bkash'} &bull; ${dep.trxId||''}</span><span class="font-extrabold text-sm">৳ ${dep.amount||0}</span></div></div>`;
+                });
+            });
+        }
+
+        // ==========================================
+        // সার্ভিস লোড
+        // ==========================================
+        function loadServicesList(){
+            onSnapshot(collection(db,"services"),(snapshot)=>{
+                allServices=[];const cats=new Set();
+                snapshot.forEach(d=>{const data={id:d.id,...d.data()};allServices.push(data);if(data.category)cats.add(data.category)});
+                const cs=document.getElementById('categorySelect');
+                cs.innerHTML=`<option value="" disabled selected>📁 Choose category...</option>`;
+                Array.from(cats).sort().forEach(c=>cs.innerHTML+=`<option value="${c}">${c}</option>`);
+            });
+        }
+
+        function updateStepIndicator(step){
+            const dots=document.querySelectorAll('.step-dot');
+            const lines=[document.getElementById('line1'),document.getElementById('line2'),document.getElementById('line3'),document.getElementById('line4')];
+            dots.forEach((dot,i)=>{const s=i+1;dot.classList.remove('active','done');if(s<step)dot.classList.add('done');else if(s===step)dot.classList.add('active')});
+            lines.forEach((line,i)=>{line.style.width=i<step-1?'100%':'0%'});
+        }
+
+        document.getElementById('categorySelect').addEventListener('change',()=>{
+            haptic('light');clearError('catError');
+            const cat=document.getElementById('categorySelect').value;
+            const ss=document.getElementById('serviceSelect');
+            if(!cat){ss.innerHTML=`<option value="" disabled selected>Select category first</option>`;return}
+            const f=allServices.filter(s=>s.category===cat);
+            ss.innerHTML=`<option value="" disabled selected>✨ Select service...</option>`;
+            f.forEach(s=>{ss.innerHTML+=`<option value="${s.id}">${s.name} — ৳${s.price||0}/1k</option>`});
+            document.getElementById('serviceInfoBox').classList.add('hidden');
+            document.getElementById('serviceMinMaxBox').classList.add('hidden');
+            document.getElementById('pricePreview').innerHTML=`<span class="text-lg font-black text-emerald-400">৳ 0.00</span>`;
+            document.getElementById('balanceCheck').innerText='';document.getElementById('qtyHint').innerText='';
+            currentServiceData=null;updateStepIndicator(2);
+        });
+
+        document.getElementById('serviceSelect').addEventListener('change',()=>{
+            haptic('light');clearError('svcError');
+            const sid=document.getElementById('serviceSelect').value;
+            if(!sid){currentServiceData=null;return}
+            const svc=allServices.find(s=>s.id===sid);currentServiceData=svc||null;
+            const box=document.getElementById('serviceInfoBox');
+            if(svc?.desc&&svc.desc.trim()){document.getElementById('serviceDescriptionText').innerText=svc.desc;box.classList.remove('hidden')}else box.classList.add('hidden');
+            const mmBox=document.getElementById('serviceMinMaxBox');
+            if(svc){
+                document.getElementById('svcMin').innerText=Number(svc.min||0).toLocaleString();
+                document.getElementById('svcMax').innerText=svc.max?Number(svc.max).toLocaleString():'∞';
+                document.getElementById('svcRate').innerText=`৳${svc.price||0}/1k`;
+                mmBox.classList.remove('hidden');
+                document.getElementById('qtyHint').innerText=`Min: ${svc.min||10} — Max: ${svc.max||'Unlimited'}`;
+                const qi=document.getElementById('orderQuantity');qi.value=svc.min||100;if(svc.min)qi.min=svc.min;if(svc.max)qi.max=svc.max;
+            }else mmBox.classList.add('hidden');
+            calcPrice();updateStepIndicator(3);
+        });
+
+        document.getElementById('targetUrl').addEventListener('input',()=>{clearError('linkError');updateStepIndicator(document.getElementById('targetUrl').value.trim().length>5?4:3)});
+        document.getElementById('orderQuantity').addEventListener('input',()=>{clearError('qtyError');calcPrice();updateStepIndicator((parseInt(document.getElementById('orderQuantity').value)||0)>0?5:4)});
+
+        function calcPrice(){
+            const ppk=currentServiceData?.price||0;
+            const qty=parseInt(document.getElementById('orderQuantity').value)||0;
+            const preview=document.getElementById('pricePreview');
+            const balCheck=document.getElementById('balanceCheck');
+            if(ppk>0&&qty>0){const t=(ppk*qty)/1000;preview.innerHTML=`<span class="text-lg font-black text-emerald-400">৳ ${t.toFixed(2)}</span>`;balCheck.innerHTML=t>userBalance?`<span class="text-red-400">Short ৳ ${(t-userBalance).toFixed(2)}</span>`:`<span class="text-emerald-400/60">Sufficient</span>`;return t}
+            preview.innerHTML=`<span class="text-lg font-black text-emerald-400">৳ 0.00</span>`;balCheck.innerText='';return 0;
+        }
+
+        function showError(id,msg){const el=document.getElementById(id);if(msg)el.innerText=msg;el.classList.add('show');const input=el.previousElementSibling;if(input&&input.classList.contains('input-modern')){input.classList.add('error-shake');setTimeout(()=>input.classList.remove('error-shake'),400)}}
+        function clearError(id){document.getElementById(id).classList.remove('show')}
+        function clearAllErrors(){document.querySelectorAll('.field-error').forEach(e=>e.classList.remove('show'))}
+
+        // ==========================================
+        // অর্ডার প্লেস
+        // ==========================================
+        document.getElementById('placeOrderBtn').addEventListener('click',async()=>{
+            if(isSubmitting)return;clearAllErrors();haptic('light');
+            const catVal=document.getElementById('categorySelect').value;
+            if(!catVal){showError('catError','Please select a category');haptic('error');return}
+            const svcId=document.getElementById('serviceSelect').value;
+            if(!svcId||!currentServiceData){showError('svcError','Please select a service');haptic('error');return}
+            const link=document.getElementById('targetUrl').value.trim();
+            if(!link||link.length<5){showError('linkError','Please enter a valid URL/link');haptic('error');document.getElementById('targetUrl').classList.add('error-shake');setTimeout(()=>document.getElementById('targetUrl').classList.remove('error-shake'),400);return}
+            const qty=parseInt(document.getElementById('orderQuantity').value);
+            const minQty=currentServiceData.min||10;const maxQty=currentServiceData.max||999999999;
+            if(!qty||qty<minQty){showError('qtyError',`Minimum quantity is ${minQty}`);haptic('error');return}
+            if(qty>maxQty){showError('qtyError',`Maximum quantity is ${Number(maxQty).toLocaleString()}`);haptic('error');return}
+            const ppk=currentServiceData.price||0;const cost=(ppk*qty)/1000;
+            if(cost<=0){showToast('Service price error','error');haptic('error');return}
+            if(userBalance<cost){
+                showModalConfirm('Insufficient Balance',`<div class="space-y-2"><p class="text-slate-300">You need more balance.</p><div class="bg-red-500/10 border border-red-500/15 rounded-xl p-3 space-y-1"><div class="flex justify-between"><span class="text-slate-400 text-xs">Required:</span><span class="font-bold text-red-400">৳ ${cost.toFixed(2)}</span></div><div class="flex justify-between"><span class="text-slate-400 text-xs">Your Balance:</span><span class="font-bold">৳ ${userBalance.toFixed(2)}</span></div><div class="flex justify-between border-t border-red-500/10 pt-1 mt-1"><span class="text-slate-400 text-xs">Short:</span><span class="font-extrabold text-red-400">৳ ${(cost-userBalance).toFixed(2)}</span></div></div></div>`,()=>switchToPage('funds'));
+                haptic('error');return;
+            }
+            const sname=currentServiceData.name||'Service';
+            showModalConfirm('Confirm Your Order',`<div class="space-y-2"><div class="flex justify-between py-1.5" style="border-bottom:1px dashed var(--border-color)"><span class="text-slate-400 text-xs">Service</span><span class="font-bold text-xs text-right max-w-[60%]">${sname}</span></div><div class="flex justify-between py-1.5" style="border-bottom:1px dashed var(--border-color)"><span class="text-slate-400 text-xs">Quantity</span><span class="font-bold text-xs">${Number(qty).toLocaleString()}</span></div><div class="flex justify-between py-1.5" style="border-bottom:1px dashed var(--border-color)"><span class="text-slate-400 text-xs">Cost</span><span class="font-bold text-xs text-emerald-400">৳ ${cost.toFixed(2)}</span></div><div class="flex justify-between py-1.5"><span class="text-slate-400 text-xs">Remaining</span><span class="font-bold text-xs">৳ ${(userBalance-cost).toFixed(2)}</span></div></div>`,async()=>{await executeOrder(sname,qty,link,cost)});
+        });
+
+        async function executeOrder(sname,qty,link,cost){
+            isSubmitting=true;haptic('heavy');
+            const btn=document.getElementById('placeOrderBtn'),txt=document.getElementById('orderBtnText'),icon=document.getElementById('orderBtnIcon');
+            const origHtml=txt.innerHTML;txt.innerHTML='PROCESSING...';icon.className='';icon.innerHTML='<span class="loading-spinner"></span>';btn.disabled=true;
+            try{
+                const orderId=`FSM_${Date.now().toString(36).toUpperCase()}`;
+                await addDoc(collection(db,"orders"),{uid:currentUserId,service:sname,qty,link,cost,status:"Pending",timestamp:serverTimestamp(),apiOrderId:orderId,createdAt:new Date().toISOString()});
+                const newBal=userBalance-cost,newOrd=userTotalOrders+1;
+                await updateDoc(doc(db,"users",currentUserId),{balance:newBal,total_orders:newOrd});
+                userBalance=newBal;userTotalOrders=newOrd;updateUserUI();
+                document.getElementById('targetUrl').value='';document.getElementById('orderQuantity').value='100';
+                document.getElementById('serviceSelect').innerHTML=`<option value="" disabled selected>Select category first</option>`;
+                document.getElementById('categorySelect').value='';
+                document.getElementById('serviceInfoBox').classList.add('hidden');document.getElementById('serviceMinMaxBox').classList.add('hidden');
+                document.getElementById('pricePreview').innerHTML=`<span class="text-lg font-black text-emerald-400">৳ 0.00</span>`;
+                document.getElementById('balanceCheck').innerText='';document.getElementById('qtyHint').innerText='';
+                currentServiceData=null;updateStepIndicator(1);
+                haptic('success');showToast('Order placed successfully!','success',3000);
+                setTimeout(()=>switchToPage('orders'),800);
+            }catch(e){console.error('Order error:',e);haptic('error');showToast('Failed to place order.','error',3500)}
+            finally{txt.innerHTML=origHtml;icon.innerHTML='';icon.className='fas fa-paper-plane text-xs';btn.disabled=false;isSubmitting=false}
+        }
+
+        // ==========================================
+        // অর্ডার রেন্ডার
+        // ==========================================
+        function renderOrders(arr){
+            const c=document.getElementById('ordersContainer');
+            if(!arr||!arr.length){c.innerHTML=`<div class="empty-state"><i class="fas fa-receipt"></i><p>No orders yet</p><p class="text-[10px] mt-1 font-normal">Place your first order from Home tab</p></div>`;return}
+            c.innerHTML="";
+            arr.forEach(o=>{
+                let st='bg-slate-500/15 text-slate-400',ic='fa-clock';
+                if(o.status==='Completed'){st='bg-emerald-500/15 text-emerald-400';ic='fa-check-circle'}
+                else if(o.status==='Processing'||o.status==='In Progress'){st='bg-blue-500/15 text-blue-400';ic='fa-spinner fa-spin'}
+                else if(o.status==='Cancelled'){st='bg-red-500/15 text-red-400';ic='fa-times-circle'}
+                else if(o.status==='Partial'){st='bg-orange-500/15 text-orange-400';ic='fa-exclamation-circle'}
+                const dateStr=o.timestamp?new Date(o.timestamp.seconds*1000).toLocaleDateString('en-BD',{day:'2-digit',month:'short',year:'numeric'}):(o.createdAt?new Date(o.createdAt).toLocaleDateString('en-BD',{day:'2-digit',month:'short'}):'—');
+                const timeStr=o.timestamp?new Date(o.timestamp.seconds*1000).toLocaleTimeString('en-BD',{hour:'2-digit',minute:'2-digit'}):'';
+                c.innerHTML+=`<div class="glass-card p-4"><div class="flex justify-between items-start mb-2"><span class="text-[9px] font-mono text-slate-600 bg-slate-800/50 px-2 py-0.5 rounded">${o.apiOrderId||o.id?.slice(-8)}</span><span class="order-status ${st}"><i class="fas ${ic} mr-1 text-[7px]"></i>${o.status||'Pending'}</span></div><h4 class="font-bold text-xs">${o.service||'Service'}</h4><p class="text-[10px] text-slate-500 truncate mt-0.5 font-mono">${o.link||''}</p><div class="dashed-divider my-3"></div><div class="flex justify-between"><div><span class="text-[8px] font-black text-slate-600 uppercase">Qty</span><div class="font-bold text-xs">${Number(o.qty||0).toLocaleString()}</div></div><div><span class="text-[8px] font-black text-slate-600 uppercase">Cost</span><div class="font-bold text-xs text-emerald-400">৳${(o.cost||0).toFixed(2)}</div></div><div class="text-right"><span class="text-[8px] font-black text-slate-600 uppercase">Date</span><div class="text-[10px] text-slate-500">${dateStr}</div><div class="text-[8px] text-slate-600">${timeStr}</div></div></div></div>`;
+            });
+        }
+
+        // ফিক্সড: অর্ডার শো না করার সমস্যা সমাধান (ইনডেক্স এড়িয়ে ক্লায়েন্ট সাইড ফিল্টারিং)
+        function listenUserOrders(uid){
+            const q=query(collection(db,"orders"),orderBy("timestamp","desc"));
+            onSnapshot(q,(s)=>{
+                const l=[];
+                s.forEach(d=>{
+                    const data = d.data();
+                    if(data.uid === uid){ // শুধুমাত্র লগইন করা ইউজারের অর্ডার নিবে
+                        l.push({id:d.id,...data});
+                    }
+                });
+                renderOrders(l);
+            });
+        }
+
+        // ==========================================
+        // ডিপোজিট রিকোয়েস্ট
+        // ==========================================
+        document.getElementById('requestDepositBtn').addEventListener('click',async()=>{
+            if(isDepSubmitting)return;clearAllErrors();haptic('light');
+            const amt=parseFloat(document.getElementById('depositAmount').value);
+            const trx=document.getElementById('depositTrxId').value.trim();
+            let hasError=false;
+            if(!amt||amt<50){showError('depAmtError','Minimum amount is ৳ 50');hasError=true}
+            if(amt>50000){showError('depAmtError','Maximum is ৳ 50,000');hasError=true}
+            if(!trx||trx.length<4){showError('depTrxError','Enter a valid Transaction ID');hasError=true}
+            if(hasError){haptic('error');return}
+            isDepSubmitting=true;haptic('heavy');
+            const btn=document.getElementById('requestDepositBtn'),txt=document.getElementById('depositBtnText'),icon=document.getElementById('depBtnIcon');
+            const origHtml=txt.innerHTML;txt.innerHTML='SUBMITTING...';icon.innerHTML='<span class="loading-spinner"></span>';icon.className='';btn.disabled=true;
+            try{
+                await addDoc(collection(db,"deposit_requests"),{uid:currentUserId,amount:amt,trxId:trx.toUpperCase(),method:selectedPaymentMethod,status:"Pending",timestamp:serverTimestamp()});
+                haptic('success');showToast('Deposit request submitted!','success',3500);
+                document.getElementById('depositAmount').value='';document.getElementById('depositTrxId').value='';
+            }catch(e){console.error('Deposit error:',e);haptic('error');showToast('Failed to submit.','error')}
+            finally{txt.innerHTML=origHtml;icon.innerHTML='';icon.className='fas fa-paper-plane text-xs';btn.disabled=false;isDepSubmitting=false}
+        });
+
+        // ==========================================
+        // নেভিগেশন
+        // ==========================================
+        const sections={home:document.getElementById('homeSection'),orders:document.getElementById('ordersSection'),funds:document.getElementById('fundsSection'),support:document.getElementById('supportSection')};
+        const navItems=document.querySelectorAll('.nav-item-premium');
+
+        function switchToPage(id){
+            haptic('light');
+            Object.values(sections).forEach(s=>s.classList.remove('active'));
+            sections[id].classList.add('active');
+            navItems.forEach(n=>{if(n.getAttribute('data-page')===id)n.classList.add('active');else n.classList.remove('active')});
+            if(tg){try{if(id==='home')tg.BackButton.hide();else tg.BackButton.show()}catch(e){}}
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        navItems.forEach(n=>n.addEventListener('click',()=>switchToPage(n.getAttribute('data-page'))));
+        document.getElementById('notifToastBtn').addEventListener('click',()=>{haptic('light');showToast('No new notifications','info',2000)});
+        document.getElementById('logoutBtn').addEventListener('click',handleLogout);
+
+        // Enter key সাপোর্ট
+        document.getElementById('loginPassword').addEventListener('keydown',(e)=>{if(e.key==='Enter')window.handleLogin()});
+        document.getElementById('regConfirmPass').addEventListener('keydown',(e)=>{if(e.key==='Enter')window.handleRegister()});
+
+        // ==========================================
+        // বুটস্ট্র্যাপ — অ্যাপ লোড
+        // ==========================================
+        window.addEventListener('load',async()=>{
+            setupTelegramMiniApp();
+
+            // থিম সিঙ্ক
+            if(tg?.colorScheme==='light')document.body.classList.add('light-theme');
+            if(tg)tg.onEvent('themeChanged',()=>{if(tg.colorScheme==='light')document.body.classList.add('light-theme');else document.body.classList.remove('light-theme')});
+
+            // সেশন চেক
+            try{
+                const saved=localStorage.getItem('smm_session');
+                if(saved){
+                    const session=JSON.parse(saved);
+                    if(session.uid&&session.username){
+                        currentUserData=session;
+                        // ফায়ারস্টোরে ইউজার আছে কিনা যাচাই
+                        const uSnap=await getDoc(doc(db,"auth_users",session.uid));
+                        if(uSnap.exists()){
+                            // স্প্ল্যাশ শেষে সরাসরি অ্যাপে ঢুকবে
+                            window._autoLogin={uid:session.uid,name:session.name,username:session.username};
+                        }else{
+                            localStorage.removeItem('smm_session');
+                        }
+                    }
+                }
+            }catch(e){localStorage.removeItem('smm_session')}
+
+            // স্প্ল্যাশ স্ক্রিন সরানো
+            setTimeout(()=>{
+                const sp=document.getElementById('splashScreen');
+                sp.style.transition="opacity 0.4s, transform 0.4s";sp.style.opacity="0";sp.style.transform="scale(1.05)";
+                setTimeout(()=>{sp.remove();
+                    // অটো লগইন বা অথেন্টিকেশন স্ক্রিন
+                    if(window._autoLogin){
+                        const al=window._autoLogin;
+                        showToast(`Welcome back, ${al.name}!`,'success',2500);
+                        enterApp(al.uid,al.name,al.username);
+                    }else{
+                        document.getElementById('authScreen').classList.add('visible');
+                    }
+                },500);
+            },2200);
+        });
+    </script>
+</body>
+</html>
